@@ -18,6 +18,7 @@ import { useState } from "react";
 export function PostCard({ post, showFullDescription = false }: { post: Post; showFullDescription?: boolean }) {
   const { currentUser, comments, vote, reportContent } = useVibe();
   const uid = currentUser?.id;
+  
   const userVote =
       uid && post.votes.red.includes(uid) ? "red" :
           uid && post.votes.green.includes(uid) ? "green" :
