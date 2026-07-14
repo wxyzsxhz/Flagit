@@ -93,7 +93,7 @@ export function Navbar({ onSearch, search }: {
           </Popover>
         )}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Button size="icon" variant="ghost" onClick={toggleTheme} aria-label="Toggle theme" className="rounded-full">
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>

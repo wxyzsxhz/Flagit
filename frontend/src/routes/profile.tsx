@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Outlet } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useVibe } from "@/lib/vibe-context";
 import { AppShell } from "@/components/vibe/AppShell";
@@ -15,6 +15,14 @@ export const Route = createFileRoute("/profile")({ component: ProfilePage });
 function ProfilePage() {
   const { currentUser, posts, comments, loading } = useVibe();
   const router = useRouter();
+
+  const isOwnProfileRoute =
+    router.state.location.pathname === "/profile";
+  
+    if (!isOwnProfileRoute) {
+    return <Outlet />;
+  }
+  
   useEffect(() => {
     if (!loading && !currentUser) {
       router.navigate({ to: "/login" });
