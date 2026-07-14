@@ -19,27 +19,60 @@ export function CreatePostDialog({ open, onOpenChange }: { open: boolean; onOpen
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<Category>("Relationship");
-  const [image, setImage] = useState<string | undefined>(undefined);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
 
-  const reset = () => { setTitle(""); setDescription(""); setCategory("Relationship"); setImage(undefined); };
+  const reset = () => {
+    setTitle("");
+    setDescription("");
+    setCategory("Relationship");
+    setImageFile(null);
+    setImagePreview(undefined);
+  };
 
   const submit = async () => {
-    if (title.trim().length < 5) return toast.error("Title needs at least 5 characters.");
-    if (description.trim().length < 10) return toast.error("Description needs at least 10 characters.");
-    const res = await createPost({ title, description, category, image });
-    if (!res.ok) return toast.error(res.error ?? "Couldn't post.");
+    if (title.trim().length < 5) {
+      return toast.error("Title needs at least 5 characters.");
+    }
+
+    if (description.trim().length < 10) {
+      return toast.error("Description needs at least 10 characters.");
+    }
+
+    const formData = new FormData();
+
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("category", category);
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
+    const res = await createPost(formData);
+
+    if (!res.ok) {
+      return toast.error(res.error ?? "Couldn't post.");
+    }
+
     toast.success("Posted! Let the internet decide the vibe.");
+
     reset();
     onOpenChange(false);
   };
 
+
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
-    if (file.size > 3_000_000) return toast.error("Image too large (max 3MB).");
-    const reader = new FileReader();
-    reader.onload = () => setImage(reader.result as string);
-    reader.readAsDataURL(file);
+
+    if (file.size > 3_000_000) {
+      return toast.error("Image too large (max 3MB).");
+    }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   return (
@@ -71,17 +104,35 @@ export function CreatePostDialog({ open, onOpenChange }: { open: boolean; onOpen
           </div>
           <div className="space-y-1">
             <Label>Image (optional)</Label>
-            {image ? (
+            {imagePreview ? (
               <div className="relative overflow-hidden rounded-2xl border border-border">
-                <img src={image} alt="" className="max-h-48 w-full object-cover" />
-                <button onClick={() => setImage(undefined)} className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white">
+                <img
+                  src={imagePreview}
+                  alt=""
+                  className="max-h-48 w-full object-cover"
+                />
+
+                <button
+                  onClick={() => {
+                    setImageFile(null);
+                    setImagePreview(undefined);
+                  }}
+                  className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white"
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-muted/40 py-6 text-sm text-muted-foreground hover:bg-muted">
-                <ImagePlus className="h-4 w-4" /> Add an image
-                <input type="file" accept="image/*" className="hidden" onChange={onFile} />
+                <ImagePlus className="h-4 w-4" />
+                Add an image
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={onFile}
+                />
               </label>
             )}
           </div>
