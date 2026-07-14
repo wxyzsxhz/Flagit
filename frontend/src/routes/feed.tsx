@@ -24,21 +24,19 @@ export const Route = createFileRoute("/feed")({ component: FeedPage });
 type Sort = "newest" | "trending";
 
 function FeedPage() {
-  const { currentUser, posts, comments } = useVibe();
+  const { currentUser, posts, comments, loading } = useVibe();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | "all">("all");
   const [sort, setSort] = useState<Sort>("newest");
   const [creating, setCreating] = useState(false);
   const [visible, setVisible] = useState(6);
-  const [hydrated, setHydrated] = useState(false);
-
+  
   useEffect(() => {
-    setHydrated(true);
-  }, []);
-  useEffect(() => {
-    if (hydrated && !currentUser) router.navigate({ to: "/" });
-  }, [hydrated, currentUser, router]);
+  if (!loading && !currentUser) {
+    router.navigate({ to: "/" });
+  }
+  }, [loading, currentUser, router]);
 
   const filtered = useMemo(() => {
     let list = posts;
@@ -65,7 +63,7 @@ function FeedPage() {
     return sorted;
   }, [posts, category, search, sort, comments]);
 
-  if (!hydrated || !currentUser) {
+  if (loading) {
     return (
       <AppShell>
         <PostSkeleton />
@@ -73,6 +71,10 @@ function FeedPage() {
       </AppShell>
     );
   }
+
+  if (!currentUser) {
+  return null;
+}
 
   return (
     <>
@@ -173,4 +175,5 @@ function FeedPage() {
       <CreatePostDialog open={creating} onOpenChange={setCreating} />
     </>
   );
+
 }

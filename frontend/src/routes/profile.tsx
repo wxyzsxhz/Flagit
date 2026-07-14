@@ -6,15 +6,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { PostCard } from "@/components/vibe/PostCard";
 import { levelFor, karmaProgress } from "@/lib/vibe-store";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 import { Calendar, MessageSquare, FileText, Pencil } from "lucide-react"; // Added Pencil icon
 import { Button } from "@/components/ui/button"; // Added Button component
 
 export const Route = createFileRoute("/profile")({ component: ProfilePage });
 
 function ProfilePage() {
-  const { currentUser, posts, comments } = useVibe();
+  const { currentUser, posts, comments, loading } = useVibe();
   const router = useRouter();
-  useEffect(() => { if (!currentUser) router.navigate({ to: "/" }); }, [currentUser, router]);
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      router.navigate({ to: "/login" });
+    }
+  }, [loading, currentUser, router]);
 
   const myPosts = useMemo(
     () => currentUser ? posts.filter((p) => p.authorId === currentUser.id).sort((a, b) => b.createdAt - a.createdAt) : [],
@@ -25,7 +30,17 @@ function ProfilePage() {
     [comments, currentUser]
   );
 
-  if (!currentUser) return null;
+  if (loading) {
+    return (<AppShell>
+      <PostSkeleton />
+      <PostSkeleton />
+    </AppShell>);
+  }
+
+  if (!currentUser) {
+    return null;
+  }
+
   const lvl = levelFor(currentUser.karma);
   const prog = karmaProgress(currentUser.karma);
 
@@ -63,11 +78,11 @@ function ProfilePage() {
               </div>
               <div className="rounded-2xl bg-muted/60 p-3">
                 <p className="text-2xl font-bold">{myPosts.length}</p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><FileText className="h-3 w-3"/> Posts</p>
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><FileText className="h-3 w-3" /> Posts</p>
               </div>
               <div className="rounded-2xl bg-muted/60 p-3">
                 <p className="text-2xl font-bold">{myCommentCount}</p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><MessageSquare className="h-3 w-3"/> Comments</p>
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><MessageSquare className="h-3 w-3" /> Comments</p>
               </div>
             </div>
 

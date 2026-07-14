@@ -48,9 +48,13 @@ const FLAG_CARDS = [
 ];
 
 function Landing() {
-  const { currentUser } = useVibe();
+  const { currentUser, loading } = useVibe();
   const router = useRouter();
-  useEffect(() => { if (currentUser) router.navigate({ to: "/feed" }); }, [currentUser, router]);
+  useEffect(() => {
+  if (!loading && currentUser) {
+    router.navigate({ to: "/feed" });
+  }
+}, [loading, currentUser, router]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,7 +148,7 @@ function Landing() {
       {/* How it works */}
       <section className="mx-auto max-w-6xl px-4 py-20">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">How VibeCheck works</h2>
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-5xl">How Flagit works</h2>
         </div>
         <div className="grid gap-6 sm:grid-cols-3">
           {[
@@ -197,7 +201,7 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        <p>© 2026 VibeCheck · Prototype</p>
+        <p>© 2026 Flagit · Prototype</p>
       </footer>
     </div>
   );
