@@ -19,12 +19,9 @@ function UserProfilePage() {
   const router = useRouter();
 
   const profileUser = useMemo(
-  () =>
-    users.find(
-      (u) => u.username.toLowerCase() === username.toLowerCase()
-    ),
-  [users, username]
-);
+    () => users.find((u) => u.username === username),
+    [users, username]
+  );
 
   const userPosts = useMemo(
     () => profileUser ? posts.filter((p) => p.authorId === profileUser.id).sort((a, b) => b.createdAt - a.createdAt) : [],
