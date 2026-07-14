@@ -10,6 +10,21 @@ import {
 } from "./vibe-store";
 import { apiGet, apiPost, apiPatch, apiDelete, setAccessToken, refreshSession, ApiError } from "./api";
 
+export type NotificationType = "like_post" | "like_comment" | "reply_comment" | "post_milestone" | "achievement";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  actorId?: string;
+  actorName?: string;
+  postId?: string;
+  commentId?: string;
+  message: string;
+  meta?: Record<string, unknown>;
+  read: boolean;
+  createdAt: number;
+}
+
 interface VibeContextValue {
   currentUser: User | null;
   users: User[];
@@ -31,6 +46,11 @@ interface VibeContextValue {
   deleteComment: (id: string) => void;
   toggleReaction: (commentId: string, key: ReactionKey) => void;
   reportContent: (kind: "post" | "comment" | "user", id: string, reason: string) => void;
+  notifications: Notification[];
+  unreadNotifCount: number;
+  fetchNotifications: () => Promise<void>;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
 }
 
 const VibeContext = createContext<VibeContextValue | null>(null);
@@ -46,6 +66,8 @@ export function VibeProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
   // Loads (or reloads) the public data every screen needs. `users` is
   // sourced from the top-100-by-karma listing — see backend/README.md's
@@ -273,11 +295,56 @@ export function VibeProvider({ children }: { children: ReactNode }) {
     apiPost(`/posts/${id}/report`, { reason }).catch(() => {});
   }, []);
 
+  const fetchNotifications = useCallback(async () => {
+    if (!currentUser) return;
+    try {
+      const res = await apiGet<{ notifications: Notification[]; unreadCount: number }>("/notifications");
+      setNotifications(res.notifications);
+      setUnreadNotifCount(res.unreadCount);
+    } catch {
+      // notifications are a nice-to-have; a failed fetch shouldn't break the rest of the app
+    }
+  }, [currentUser]);
+
+  const markNotificationRead = useCallback((id: string) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setUnreadNotifCount((c) => Math.max(0, c - 1));
+    apiPost(`/notifications/${id}/read`).catch(() => {
+      // roll back on failure by refetching from source of truth
+      fetchNotifications().catch(() => {});
+    });
+  }, [fetchNotifications]);
+
+  const markAllNotificationsRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setUnreadNotifCount(0);
+    apiPost("/notifications/read-all").catch(() => {
+      fetchNotifications().catch(() => {});
+    });
+  }, [fetchNotifications]);
+
+  // Load notifications once a session is restored, and clear them on logout.
+  useEffect(() => {
+    if (currentUser) {
+      fetchNotifications().catch(() => {});
+    } else {
+      setNotifications([]);
+      setUnreadNotifCount(0);
+    }
+  }, [currentUser, fetchNotifications]);
+
+
   const value = useMemo<VibeContextValue>(() => ({
     currentUser, users, posts, comments, theme, loading,
+    notifications, unreadNotifCount, fetchNotifications, markNotificationRead, markAllNotificationsRead,
     toggleTheme, login, register, logout, updateUser, changePassword,
     createPost, deletePost, vote, addComment, editComment, deleteComment, toggleReaction, reportContent,
-  }), [currentUser, users, posts, comments, theme, loading, toggleTheme, login, register, logout, updateUser, changePassword, createPost, deletePost, vote, addComment, editComment, deleteComment, toggleReaction, reportContent]);
+  }), [
+    currentUser, users, posts, comments, theme, loading,
+    notifications, unreadNotifCount, fetchNotifications, markNotificationRead, markAllNotificationsRead,
+    toggleTheme, login, register, logout, updateUser, changePassword,
+    createPost, deletePost, vote, addComment, editComment, deleteComment, toggleReaction, reportContent,
+  ]);
 
   return <VibeContext.Provider value={value}>{children}</VibeContext.Provider>;
 }

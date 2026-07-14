@@ -19,12 +19,8 @@ const CATEGORY_EMOJI: Record<Category, string> = {
   Others: "🌀",
 };
 
-// Prototype: pretend there's always 1 unread notification
-const HAS_NEW_NOTIFS = true;
-
 export function LeftSidebar() {
-  const { currentUser, logout } = useVibe();
-  const router = useRouter();
+  const { currentUser, logout, unreadNotifCount } = useVibe();  const router = useRouter();
   const path = router.state.location.pathname;
   const lvl = currentUser ? levelFor(currentUser.karma) : null;
   const prog = currentUser ? karmaProgress(currentUser.karma) : null;
@@ -82,7 +78,7 @@ export function LeftSidebar() {
 
         <nav className="mt-3 flex-1 space-y-1 overflow-y-auto">
           {navItem("/feed", "Home Feed", Home)}
-          {navItem("/notifications", "Notifications", Bell, HAS_NEW_NOTIFS)}
+          {navItem("/notifications", "Notifications", Bell, unreadNotifCount > 0)}
           {navItem("/profile", "My Profile", UserIcon)}
           {navItem("/leaderboard", "Leaderboard", Trophy)}
         </nav>

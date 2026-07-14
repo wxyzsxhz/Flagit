@@ -12,7 +12,7 @@ function notifyPostLiked({ postAuthorId, actorId, actorName, postId }) {
     actorId,
     actorName,
     postId,
-    message: `${actorName} reacted to your post`,
+    message: `${actorName} flagged to your post`,
   });
 }
 

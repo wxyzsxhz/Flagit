@@ -89,14 +89,18 @@ export function emptyReactions(): Record<ReactionKey, string[]> {
 }
 
 const AVATARS = [
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Luna",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Kai",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zara",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Milo",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Nova",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Rex",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sky",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ivy",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=1",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=2",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=3",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=4",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=5",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=6",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=7",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=8",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=9",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=10",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=11",
+  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=12",
 ];
 
 export function randomAvatar(seed?: string) {
