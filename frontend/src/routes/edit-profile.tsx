@@ -1,10 +1,12 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useVibe } from "@/lib/vibe-context";
 import { AppShell } from "@/components/vibe/AppShell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
@@ -46,7 +48,7 @@ const avatarOptions = [
 ];
 
 function EditProfilePage() {
-  const { currentUser, updateUser, users } = useVibe(); // Added users to check for uniqueness
+  const { currentUser, updateUser, users, loading } = useVibe();
   const router = useRouter();
 
   const [username, setUsername] = useState(currentUser?.username || "");
@@ -54,13 +56,16 @@ function EditProfilePage() {
   const [usernameError, setUsernameError] = useState("");
 
   useEffect(() => {
-    if (!currentUser) {
-      router.navigate({ to: "/" });
-    } else {
-      setUsername(currentUser.username);
-      setSelectedAvatar(currentUser.avatar);
-    }
-  }, [currentUser, router]);
+  if (loading) return;
+
+  if (!currentUser) {
+    router.navigate({ to: "/profile" });
+    return;
+  }
+
+  setUsername(currentUser.username);
+  setSelectedAvatar(currentUser.avatar);
+}, [loading, currentUser, router]);
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUsername = e.target.value;
@@ -104,11 +109,26 @@ function EditProfilePage() {
     }
   };
 
-  if (!currentUser) return null;
+  if (loading) {return (
+      <AppShell>
+        <PostSkeleton />
+        <PostSkeleton />
+      </AppShell>
+    );
+  }
+
+  if (!currentUser) {
+  return null;
+}
 
   return (
     <AppShell>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-2">
+
+        <Link to="/profile" className="inline-flex items-center mb-2 gap-2 transition-colors text-sm text-muted-foreground hover:text-primary">
+          <ArrowLeft className="h-4 w-4" /> Back to feed
+        </Link>
+
         <h1 className="text-2xl font-bold">Edit Profile</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">

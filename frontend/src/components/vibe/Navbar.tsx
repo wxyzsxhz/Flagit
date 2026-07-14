@@ -44,7 +44,7 @@ export function Navbar({ onSearch, search }: {
             <Flag className="h-5 w-5 text-white" />
           </div>
           <span className="hidden text-xl font-bold tracking-tight sm:inline">
-            Vibe<span className="text-gradient-brand">Check</span>
+            Flag<span className="text-gradient-brand">it</span>
           </span>
         </Link>
 

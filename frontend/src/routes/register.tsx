@@ -83,7 +83,7 @@ function RegisterPage() {
       }
       return;
     }
-    toast.success("Welcome to VibeCheck!");
+    toast.success("Welcome to Flagit!");
     router.navigate({ to: "/feed" });
   };
 
@@ -94,7 +94,7 @@ function RegisterPage() {
         <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl gradient-brand shadow-glow">
           <Flag className="h-7 w-7 text-white" />
         </div>
-        <h1 className="text-3xl font-bold">Join VibeCheck</h1>
+        <h1 className="text-3xl font-bold">Join Flagit</h1>
         <p className="mt-1 text-sm text-muted-foreground">Anonymous username. Private email.</p>
 
         <form onSubmit={submit} className="mt-8 w-full space-y-4 rounded-3xl border border-border bg-card p-6 shadow-soft">

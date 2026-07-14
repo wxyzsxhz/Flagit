@@ -5,6 +5,7 @@ import { AppShell } from "@/components/vibe/AppShell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/change-password")({
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/change-password")({
 });
 
 function ChangePasswordPage() {
-  const { currentUser, changePassword } = useVibe();
+  const { currentUser, changePassword, loading } = useVibe();
   const router = useRouter();
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -23,10 +24,10 @@ function ChangePasswordPage() {
   const [confirmNewPasswordError, setConfirmNewPasswordError] = useState("");
 
   useEffect(() => {
-    if (!currentUser) {
-      router.navigate({ to: "/" });
+    if (!loading && !currentUser) {
+      router.navigate({ to: "/login" });
     }
-  }, [currentUser, router]);
+  }, [loading, currentUser, router]);
 
   const validateForm = () => {
     let isValid = true;
@@ -86,6 +87,15 @@ function ChangePasswordPage() {
       toast.error("Failed to change password. Please try again.");
     }
   };
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PostSkeleton />
+        <PostSkeleton />
+      </AppShell>
+    );
+  }
 
   if (!currentUser) return null;
 

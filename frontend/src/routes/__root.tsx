@@ -71,9 +71,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VibeCheck — Red Flag, Green Flag, or Black Flag?" },
+      { title: "Flagit — Red Flag, Green Flag, or Black Flag?" },
       { name: "description", content: "Share the situation anonymously. Let the internet decide the vibe. Vote 🚩 Red Flag, ✅ Green Flag, or ⚫ Black Flag." },
-      { property: "og:title", content: "VibeCheck — Red Flag, Green Flag, or Black Flag?" },
+      { property: "og:title", content: "Flagit — Red Flag, Green Flag, or Black Flag?" },
       { property: "og:description", content: "Anonymous stories. Community verdicts. Only three flags." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
