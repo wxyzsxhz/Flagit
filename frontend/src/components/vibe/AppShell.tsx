@@ -5,6 +5,7 @@ import { RightSidebar } from "./RightSidebar";
 import { MobileBottomNav } from "./MobileBottomNav";
 import type { Category } from "@/lib/vibe-store";
 import { cn } from "@/lib/utils";
+import { useVibe } from "@/lib/vibe-context";
 
 interface AppShellProps {
   children: ReactNode;
@@ -23,6 +24,9 @@ export function AppShell({
   onCategory,
   showRightSidebar = false,
 }: AppShellProps) {
+
+  const { unreadNotifCount } = useVibe();
+
   return (
     <div className="min-h-screen">
       <Navbar onSearch={onSearch} search={search} />
@@ -30,16 +34,26 @@ export function AppShell({
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 pb-24 lg:pb-6">
         <LeftSidebar />
 
-        <main className={cn("min-w-0 space-y-4", showRightSidebar ? "flex-1 max-w-2xl" : "flex-1")}>
-          <div className={cn(showRightSidebar ? "" : "mx-auto max-w-2xl")}>{children}</div>
+        <main
+          className={cn(
+            "min-w-0 space-y-4",
+            showRightSidebar ? "flex-1 max-w-2xl" : "flex-1"
+          )}
+        >
+          <div className={cn(showRightSidebar ? "" : "mx-auto max-w-2xl")}>
+            {children}
+          </div>
         </main>
 
         {showRightSidebar && (
-          <RightSidebar activeCategory={activeCategory} onCategory={onCategory} />
+          <RightSidebar
+            activeCategory={activeCategory}
+            onCategory={onCategory}
+          />
         )}
       </div>
 
-      <MobileBottomNav hasNewNotifs />
+      <MobileBottomNav hasNewNotifs={unreadNotifCount > 0} />
     </div>
   );
 }

@@ -7,7 +7,7 @@ services:
     environment:
       MYSQL_DATABASE: ${DB_NAME:-flag_nation}
       MYSQL_USER: ${DB_USER:-flag_app}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-change_me}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-flagit}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_me_root}
     volumes:
       - mysql_data:/var/lib/mysql
@@ -32,7 +32,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - "29092:29092"   # host-accessible listener — was missing/wrong before
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -46,20 +46,21 @@ services:
       interval: 15s
       timeout: 20s
       retries: 15
-      start_period: 30s
+      start_period: 45s   # bumped — cp-kafka can take a while on first boot
 
   api:
-    build: .
+    build: ./backend
     restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
       kafka:
         condition: service_healthy
-    env_file: .env
+    env_file: ./backend/.env
     environment:
       DB_HOST: mysql
       KAFKA_BROKERS: kafka:9092
+      CLIENT_URL: http://localhost:8080
     ports:
       - "4000:4000"
     healthcheck:
@@ -69,7 +70,7 @@ services:
       retries: 3
 
   notification-worker:
-    build: .
+    build: ./backend
     restart: unless-stopped
     command: ["node", "src/kafka/consumer.js"]
     depends_on:
@@ -77,10 +78,21 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
-    env_file: .env
+    env_file: ./backend/.env
     environment:
       DB_HOST: mysql
       KAFKA_BROKERS: kafka:9092
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:4000/api
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:8080"
 
 volumes:
   mysql_data:
