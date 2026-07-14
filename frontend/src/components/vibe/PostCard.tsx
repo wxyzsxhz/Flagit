@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, Share2, MoreHorizontal, Flag as FlagIcon } from "lucide-react";
+import { MessageCircle, Share2, MoreHorizontal, Flag as FlagIcon, Trash2 } from "lucide-react"; // Added Trash2
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ReportDialog } from "./ReportDialog";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  // AlertDialogTrigger, // AlertDialogTrigger is not needed here anymore
+} from "@/components/ui/alert-dialog";
 
 export function PostCard({ post, showFullDescription = false }: { post: Post; showFullDescription?: boolean }) {
-  const { currentUser, comments, vote, reportContent } = useVibe();
+  const { currentUser, comments, vote, reportContent, deletePost } = useVibe(); // Added deletePost
   const uid = currentUser?.id;
   const userVote =
       uid && post.votes.red.includes(uid) ? "red" :
@@ -24,6 +35,7 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
               uid && post.votes.black.includes(uid) ? "black" : null;
 
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // New state for delete dialog
 
   const share = () => {
     const url = `${window.location.origin}/post/${post.id}`;
@@ -53,6 +65,16 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
 
   const isAuthor = currentUser?.id === post.authorId;
 
+  const handleDeletePost = async () => {
+    const result = await deletePost(post.id);
+    if (result.ok) {
+      toast.success("Post deleted successfully!");
+    } else {
+      toast.error(result.error || "Failed to delete post.");
+    }
+    setIsDeleteDialogOpen(false); // Close dialog after action
+  };
+
   return (
       <article className="relative rounded-md border border-border bg-card p-4 shadow-soft transition hover:shadow-glow sm:p-5 mb-2">
         {/* 3-dot icon moved above the header div */}
@@ -67,13 +89,21 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-                onClick={() => setIsReportDialogOpen(true)}
-                disabled={isAuthor}
-                className={isAuthor ? "cursor-not-allowed opacity-50" : ""}
-            >
-              <FlagIcon className="mr-2 h-4 w-4" /> Report post
-            </DropdownMenuItem>
+            {!isAuthor && ( // Only show Report if not the author
+                <DropdownMenuItem
+                    onClick={() => setIsReportDialogOpen(true)}
+                >
+                  <FlagIcon className="mr-2 h-4 w-4" /> Report post
+                </DropdownMenuItem>
+            )}
+            {isAuthor && ( // Only show Delete if is the author
+                <DropdownMenuItem
+                    onClick={() => setIsDeleteDialogOpen(true)} // Open dialog on click
+                    className="text-red-500" // Optional: style for delete
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete post
+                </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -183,6 +213,23 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
             onReport={(reason) => reportContent("post", post.id, reason)}
             type="post"
         />
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your
+                post and remove its data from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeletePost}>Continue</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </article>
   );
 }
