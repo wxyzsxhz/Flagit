@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Flag } from "lucide-react";
 import { toast } from "sonner";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
+import { AppShell } from "@/components/vibe/AppShell";
 
 export const Route = createFileRoute("/register")({ component: RegisterPage });
 
 function RegisterPage() {
-  const { register, currentUser } = useVibe();
+  const { register, currentUser, loading } = useVibe();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -87,10 +89,16 @@ function RegisterPage() {
     router.navigate({ to: "/feed" });
   };
 
+  if (loading) {
+      return (
+        <PostSkeleton />
+      );
+  }
+  
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="mx-auto flex max-w-md flex-col items-center px-4 py-16">
+      <div className="mx-auto flex max-w-md flex-col items-center px-4 py-8">
         <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl gradient-brand shadow-glow">
           <Flag className="h-7 w-7 text-white" />
         </div>

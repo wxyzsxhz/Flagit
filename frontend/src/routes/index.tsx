@@ -15,6 +15,7 @@ import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
 import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -55,6 +56,12 @@ function Landing() {
     router.navigate({ to: "/feed" });
   }
 }, [loading, currentUser, router]);
+  
+  if (loading) {
+      return (
+          <PostSkeleton />
+      );
+    }
 
   return (
     <div className="min-h-screen bg-background">

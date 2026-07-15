@@ -90,10 +90,7 @@ function ChangePasswordPage() {
 
   if (loading) {
     return (
-      <AppShell>
         <PostSkeleton />
-        <PostSkeleton />
-      </AppShell>
     );
   }
 

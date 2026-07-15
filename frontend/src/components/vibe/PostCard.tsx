@@ -116,7 +116,7 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
           </p>
           {post.image && (
               <div className="mt-3 overflow-hidden rounded-2xl border border-border">
-                <img src={post.image} alt="" className="max-h-96 w-full object-cover" loading="lazy" />
+                <img src={post.image} alt="" className="w-full object-cover" loading="lazy" />
               </div>
           )}
         </Link>

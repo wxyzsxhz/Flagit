@@ -109,11 +109,9 @@ function EditProfilePage() {
     }
   };
 
-  if (loading) {return (
-      <AppShell>
+  if (loading) {
+    return (
         <PostSkeleton />
-        <PostSkeleton />
-      </AppShell>
     );
   }
 
