@@ -3,7 +3,9 @@ import { useEffect } from "react";
 import { useVibe } from "@/lib/vibe-context";
 import { AppShell } from "@/components/vibe/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 import { Heart, MessageCircle, Flag, TrendingUp, Trophy } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import type { NotificationType } from "@/lib/vibe-context";
@@ -20,13 +22,33 @@ const TYPE_ICON: Record<NotificationType, any> = {
 };
 
 function NotificationsPage() {
-  const { currentUser, notifications, fetchNotifications, markNotificationRead, markAllNotificationsRead } = useVibe();
+  const { currentUser, notifications, fetchNotifications, markNotificationRead, markAllNotificationsRead, loading } = useVibe();
   const router = useRouter();
 
-  useEffect(() => { if (!currentUser) router.navigate({ to: "/" }); }, [currentUser, router]);
-  useEffect(() => { if (currentUser) fetchNotifications().catch(() => {}); }, [currentUser, fetchNotifications]);
+  useEffect(() => {
+  if (!loading && !currentUser) {
+    router.navigate({ to: "/login" });
+  }
+}, [loading, currentUser, router]);
 
-  if (!currentUser) return null;
+  useEffect(() => {
+  if (!loading && currentUser) {
+    fetchNotifications().catch(() => {});
+  }
+}, [loading, currentUser, fetchNotifications]);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PostSkeleton />
+        <PostSkeleton />
+      </AppShell>
+    );
+  }
+
+  if (!currentUser) {
+    return null;
+  }
 
   return (
     <AppShell>

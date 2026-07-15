@@ -1,11 +1,12 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useVibe } from "@/lib/vibe-context";
 import { AppShell } from "@/components/vibe/AppShell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { PostCard } from "@/components/vibe/PostCard";
 import { levelFor, karmaProgress } from "@/lib/vibe-store";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 import { Calendar, MessageSquare, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/profile/$username")({
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/profile/$username")({
 
 function UserProfilePage() {
   const { username } = Route.useParams();
-  const { users, posts, comments, currentUser } = useVibe();
+  const { users, posts, comments, currentUser, loading } = useVibe();
   const router = useRouter();
 
   const profileUser = useMemo(
@@ -32,6 +33,25 @@ function UserProfilePage() {
     [comments, profileUser]
   );
 
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      router.navigate({ to: "/login" });
+    }
+  }, [loading, currentUser, router]);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <PostSkeleton />
+        <PostSkeleton />
+      </AppShell>
+    );
+  }
+
+  if (!currentUser) {
+    return null;
+  }
+
   if (!profileUser) {
     return (
       <AppShell>
@@ -44,6 +64,12 @@ function UserProfilePage() {
 
   const lvl = levelFor(profileUser.karma);
   const prog = karmaProgress(profileUser.karma);
+
+  console.log({
+  urlUsername: username,
+  profileUser,
+  currentUser
+});
 
   return (
     <AppShell>
@@ -69,11 +95,11 @@ function UserProfilePage() {
               </div>
               <div className="rounded-2xl bg-muted/60 p-3">
                 <p className="text-2xl font-bold">{userPosts.length}</p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><FileText className="h-3 w-3"/> Posts</p>
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><FileText className="h-3 w-3" /> Posts</p>
               </div>
               <div className="rounded-2xl bg-muted/60 p-3">
                 <p className="text-2xl font-bold">{userCommentCount}</p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><MessageSquare className="h-3 w-3"/> Comments</p>
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1"><MessageSquare className="h-3 w-3" /> Comments</p>
               </div>
             </div>
 

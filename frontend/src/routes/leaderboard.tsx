@@ -2,6 +2,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useVibe } from "@/lib/vibe-context";
 import { AppShell } from "@/components/vibe/AppShell";
+import { PostSkeleton } from "@/components/vibe/PostSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { levelFor } from "@/lib/vibe-store";
 import { Trophy } from "lucide-react";
@@ -10,11 +11,27 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/leaderboard")({ component: LeaderboardPage });
 
 function LeaderboardPage() {
-  const { users, currentUser } = useVibe();
+  const { users, currentUser, loading } = useVibe();
   const router = useRouter();
+  
   useEffect(() => {
-    if (!currentUser) router.navigate({ to: "/" });
-  }, [currentUser, router]);
+    if (!loading && !currentUser) {
+      router.navigate({ to: "/login" });
+    }
+  }, [loading, currentUser, router]);
+
+  if (loading) {
+      return (
+        <AppShell>
+          <PostSkeleton />
+          <PostSkeleton />
+        </AppShell>
+      );
+    }
+  
+    if (!currentUser) {
+      return null;
+    }
 
   const ranked = useMemo(() => [...users].sort((a, b) => b.karma - a.karma), [users]);
   if (!currentUser) return null;
