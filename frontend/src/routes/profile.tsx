@@ -39,10 +39,9 @@ function ProfilePage() {
   );
 
   if (loading) {
-    return (<AppShell>
-      <PostSkeleton />
-      <PostSkeleton />
-    </AppShell>);
+      return (
+          <PostSkeleton />
+      );
   }
 
   if (!currentUser) {

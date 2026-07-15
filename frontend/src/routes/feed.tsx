@@ -34,7 +34,7 @@ function FeedPage() {
   
   useEffect(() => {
   if (!loading && !currentUser) {
-    router.navigate({ to: "/" });
+    router.navigate({ to: "/login" });
   }
   }, [loading, currentUser, router]);
 
@@ -65,10 +65,7 @@ function FeedPage() {
 
   if (loading) {
     return (
-      <AppShell>
         <PostSkeleton />
-        <PostSkeleton />
-      </AppShell>
     );
   }
 
