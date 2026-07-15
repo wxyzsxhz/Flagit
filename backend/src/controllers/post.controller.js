@@ -99,7 +99,7 @@ const remove = asyncHandler(async (req, res) => {
 // frontend's `vote()` behavior), enforced by the unique index on
 // (postId, userId) plus this upsert-in-a-transaction.
 const castVote = asyncHandler(async (req, res) => {
-  const { type } = req.body;
+  const { type } = req.body; // `type` can be "red", "green", "black", or null for retraction
   const post = await Post.findOne({ where: { id: req.params.id, deletedAt: null } });
   if (!post) throw new ApiError(404, "Post not found.");
 
@@ -108,18 +108,28 @@ const castVote = asyncHandler(async (req, res) => {
 
   await sequelize.transaction(async (t) => {
     const existing = await Vote.findOne({ where: { postId: post.id, userId: req.user.id }, transaction: t });
-    if (existing) {
-      existing.type = type;
-      await existing.save({ transaction: t });
+
+    if (type === null) {
+      // Retract vote
+      if (existing) {
+        await existing.destroy({ transaction: t });
+      }
     } else {
-      await Vote.create({ id: makeId("v"), postId: post.id, userId: req.user.id, type }, { transaction: t });
+      // Cast or change vote
+      if (existing) {
+        existing.type = type;
+        await existing.save({ transaction: t });
+      } else {
+        await Vote.create({ id: makeId("v"), postId: post.id, userId: req.user.id, type }, { transaction: t });
+      }
     }
   });
 
   const after = await votesForPost(post.id);
   const totalAfter = totalVotes(after);
 
-  if (!before[type].includes(req.user.id)) {
+  // Only notify if a new vote is cast, not on retraction or changing vote
+  if (type !== null && !before[type].includes(req.user.id)) {
     await notifyPostLiked({
       postAuthorId: post.authorId,
       actorId: req.user.id,

@@ -48,7 +48,14 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
     return (
         <button
             aria-label={`${kind} flag`}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (!currentUser) return toast.error("Log in to vote"); vote(post.id, kind); }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!currentUser) return toast.error("Log in to vote");
+              // If the user clicks on an already active flag, retract the vote by passing null
+              // Otherwise, cast the new vote
+              vote(post.id, active ? null : kind);
+            }}
             className={cn(
                 "flex items-center gap-1 rounded-full px-2.5 py-1.5 transition hover:bg-muted dark:bg-white/10",
                 active && activeBg

@@ -10,7 +10,7 @@ import {
 } from "./vibe-store";
 import { apiGet, apiPost, apiPatch, apiDelete, setAccessToken, refreshSession, ApiError } from "./api";
 
-export type NotificationType = "like_post" | "like_comment" | "reply_comment" | "post_milestone" | "achievement";
+export type NotificationType = "like_post" | "like_comment" | "reply_comment" | "post_milestone" | "achievement" | "comment_on_post";
 
 export interface Notification {
   id: string;
@@ -40,7 +40,7 @@ interface VibeContextValue {
   changePassword: (userId: string, currentPassword: string, newPassword: string) => Promise<{ ok: boolean; error?: string }>;
   createPost: (data: { title: string; description: string; category: Category; image?: string }) => Promise<{ ok: boolean; error?: string }>;
   deletePost: (postId: string) => Promise<{ ok: boolean; error?: string }>;
-  vote: (postId: string, choice: FlagVote) => void;
+  vote: (postId: string, choice: FlagVote | null) => void;
   addComment: (postId: string, content: string, parentId?: string | null) => Promise<{ ok: boolean; error?: string }>;
   editComment: (id: string, content: string) => void;
   deleteComment: (id: string) => void;
@@ -215,25 +215,33 @@ export function VibeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const vote = useCallback((postId: string, choice: FlagVote) => {
+  const vote = useCallback((postId: string, choice: FlagVote | null) => {
     if (!currentUser) return;
-    // Optimistic update so the flag UI responds instantly...
+    const uid = currentUser.id;
+
     setPosts((prev) => prev.map((p) => {
       if (p.id !== postId) return p;
-      const uid = currentUser.id;
-      const votes = {
+
+      const newVotes = {
         red: p.votes.red.filter((v) => v !== uid),
         green: p.votes.green.filter((v) => v !== uid),
         black: p.votes.black.filter((v) => v !== uid),
       };
-      votes[choice] = [...votes[choice], uid];
-      return { ...p, votes };
+
+      // If a choice is provided (not null), add the user's vote to that choice.
+      // This handles both new votes and changing votes.
+      // If choice is null, it means the user is retracting their vote,
+      // and the filters above already removed the user's vote from all categories.
+      if (choice) {
+        newVotes[choice] = [...newVotes[choice], uid];
+      }
+
+      return { ...p, votes: newVotes };
     }));
-    // ...then reconcile with the server's authoritative vote counts
-    // (also covers milestone/achievement side effects triggered server-side).
+
     apiPost<{ post: Post }>(`/posts/${postId}/vote`, { type: choice })
       .then((res) => setPosts((prev) => prev.map((p) => (p.id === postId ? res.post : p))))
-      .catch(() => loadPublicData().catch(() => {})); // roll back to server truth on failure
+      .catch(() => loadPublicData().catch(() => {}));
   }, [currentUser, loadPublicData]);
 
   const addComment = useCallback(async (postId: string, content: string, parentId: string | null = null) => {
@@ -244,6 +252,8 @@ export function VibeProvider({ children }: { children: ReactNode }) {
     try {
       const res = await apiPost<{ comment: Comment }>(`/posts/${postId}/comments`, { content, parentId });
       setComments((prev) => [...prev, res.comment]);
+      // TODO: Backend should send a notification to the post author if a new comment is added to their post.
+      // This would be handled by the backend, but the notification type is now available.
       return { ok: true };
     } catch (err) {
       return { ok: false, error: errorMessage(err, "Couldn't comment.") };
