@@ -104,7 +104,7 @@ const AVATARS = [
 ];
 
 export function randomAvatar(seed?: string) {
-  if (seed) return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  if (seed) return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(seed)}`;
   return AVATARS[Math.floor(Math.random() * AVATARS.length)];
 }
 

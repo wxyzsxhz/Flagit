@@ -38,12 +38,9 @@ function NotificationsPage() {
 }, [loading, currentUser, fetchNotifications]);
 
   if (loading) {
-    return (
-      <AppShell>
-        <PostSkeleton />
-        <PostSkeleton />
-      </AppShell>
-    );
+      return (
+          <PostSkeleton />
+      );
   }
 
   if (!currentUser) {

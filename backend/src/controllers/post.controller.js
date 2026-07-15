@@ -61,7 +61,8 @@ const getOne = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-  const { title, description, category, image } = req.body;
+  const { title, description, category } = req.body;
+  const image = req.file?.path || null;
 
   const m1 = moderate(title);
   if (!m1.ok) throw new ApiError(400, m1.reason);
@@ -73,11 +74,14 @@ const create = asyncHandler(async (req, res) => {
     title: m1.cleaned,
     description: m2.cleaned,
     category,
-    image: image || null,
+    image: image,
     authorId: req.user.id,
     authorName: req.user.username,
     authorAvatar: req.user.avatar,
   });
+
+  console.log("BODY:", req.body);
+  console.log("FILE:", req.file);
 
   res.status(201).json({ post: serializePost(post, { red: [], green: [], black: [] }) });
 });

@@ -23,12 +23,13 @@ export class ApiError extends Error {
 }
 
 async function rawRequest(path: string, options: RequestInit) {
+  const isFormData = options.body instanceof FormData;
+
   return fetch(`${API_BASE}${path}`, {
     ...options,
-    // Sends/receives the httpOnly refresh-token cookie.
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(options.headers || {}),
     },
@@ -73,9 +74,29 @@ export async function apiFetch<T = any>(
 export function apiGet<T = any>(path: string) {
   return apiFetch<T>(path, { method: "GET" });
 }
-export function apiPost<T = any>(path: string, body?: unknown) {
-  return apiFetch<T>(path, { method: "POST", body: body !== undefined ? JSON.stringify(body) : undefined });
+
+export function apiPost<T = any>(
+  path: string,
+  body?: unknown
+) {
+  const isFormData = body instanceof FormData;
+
+  return apiFetch<T>(path, {
+    method: "POST",
+    headers: isFormData
+      ? undefined
+      : {
+          "Content-Type": "application/json",
+        },
+    body:
+      body === undefined
+        ? undefined
+        : isFormData
+          ? body
+          : JSON.stringify(body),
+  });
 }
+
 export function apiPatch<T = any>(path: string, body?: unknown) {
   return apiFetch<T>(path, { method: "PATCH", body: body !== undefined ? JSON.stringify(body) : undefined });
 }

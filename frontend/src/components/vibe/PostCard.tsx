@@ -29,6 +29,7 @@ import {
 export function PostCard({ post, showFullDescription = false }: { post: Post; showFullDescription?: boolean }) {
   const { currentUser, comments, vote, reportContent, deletePost } = useVibe(); // Added deletePost
   const uid = currentUser?.id;
+  
   const userVote =
       uid && post.votes.red.includes(uid) ? "red" :
           uid && post.votes.green.includes(uid) ? "green" :
@@ -152,7 +153,7 @@ export function PostCard({ post, showFullDescription = false }: { post: Post; sh
           </p>
           {post.image && (
               <div className="mt-3 overflow-hidden rounded-2xl border border-border">
-                <img src={post.image} alt="" className="max-h-96 w-full object-cover" loading="lazy" />
+                <img src={post.image} alt="" className="w-full object-cover" loading="lazy" />
               </div>
           )}
         </Link>

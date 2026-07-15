@@ -38,7 +38,7 @@ interface VibeContextValue {
   logout: () => void;
   updateUser: (userId: string, data: { username?: string; password?: string; avatar?: string }) => Promise<{ ok: boolean; error?: string }>;
   changePassword: (userId: string, currentPassword: string, newPassword: string) => Promise<{ ok: boolean; error?: string }>;
-  createPost: (data: { title: string; description: string; category: Category; image?: string }) => Promise<{ ok: boolean; error?: string }>;
+  createPost: (formData: FormData) => Promise<{ ok: boolean; error?: string }>;
   deletePost: (postId: string) => Promise<{ ok: boolean; error?: string }>;
   vote: (postId: string, choice: FlagVote | null) => void;
   addComment: (postId: string, content: string, parentId?: string | null) => Promise<{ ok: boolean; error?: string }>;
@@ -186,23 +186,27 @@ export function VibeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const createPost = useCallback(async (data: { title: string; description: string; category: Category; image?: string }) => {
-    if (!currentUser) return { ok: false, error: "Login required." };
-    // Fast client-side pre-check for instant feedback; the API re-checks
-    // this authoritatively regardless (see moderate() docstring).
-    const m1 = moderate(data.title);
-    if (!m1.ok) return { ok: false, error: m1.reason };
-    const m2 = moderate(data.description);
-    if (!m2.ok) return { ok: false, error: m2.reason };
+  const createPost = useCallback(async (formData: FormData) => {
+  if (!currentUser) {
+    return { ok: false, error: "Login required." };
+  }
 
-    try {
-      const res = await apiPost<{ post: Post }>("/posts", data);
-      setPosts((prev) => [res.post, ...prev]);
-      return { ok: true };
-    } catch (err) {
-      return { ok: false, error: errorMessage(err, "Couldn't post.") };
-    }
-  }, [currentUser]);
+  const m1 = moderate(formData.get("title") as string);
+  if (!m1.ok) return { ok: false, error: m1.reason };
+
+  const m2 = moderate(formData.get("description") as string);
+  if (!m2.ok) return { ok: false, error: m2.reason };
+
+  try {
+    const res = await apiPost<{ post: Post }>("/posts", formData);
+
+    setPosts((prev) => [res.post, ...prev]);
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: errorMessage(err, "Couldn't post.") };
+  }
+}, [currentUser]);
 
   const deletePost = useCallback(async (postId: string) => {
     try {
