@@ -14,6 +14,7 @@ const TYPE_ICON: Record<NotificationType, any> = {
   like_post: Heart,
   like_comment: Heart,
   reply_comment: MessageCircle,
+  comment_post: MessageCircle,
   post_milestone: TrendingUp,
   achievement: Trophy,
 };

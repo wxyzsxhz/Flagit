@@ -8,9 +8,10 @@ const Notification = sequelize.define(
   {
     id: { type: DataTypes.STRING(64), primaryKey: true },
     userId: { type: DataTypes.STRING(64), allowNull: false }, // recipient
+
     type: {
-      type: DataTypes.ENUM("like_post", "like_comment", "reply_comment", "post_milestone", "achievement"),
-      allowNull: false,
+       type: DataTypes.ENUM("like_post", "like_comment", "reply_comment", "comment_post", "post_milestone", "achievement"),
+       allowNull: false,
     },
     actorId: { type: DataTypes.STRING(64), allowNull: true }, // who triggered it (null for system/achievement)
     actorName: { type: DataTypes.STRING(20), allowNull: true },

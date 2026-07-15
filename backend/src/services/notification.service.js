@@ -29,6 +29,19 @@ function notifyCommentReply({ parentAuthorId, actorId, actorName, postId, commen
   });
 }
 
+function notifyPostCommented({ postAuthorId, actorId, actorName, postId, commentId }) {
+  if (postAuthorId === actorId) return; // don't notify yourself
+  return publishNotificationEvent({
+    userId: postAuthorId,
+    type: "comment_post",
+    actorId,
+    actorName,
+    postId,
+    commentId,
+    message: `${actorName} commented on your post`,
+  });
+}
+
 function notifyCommentReacted({ commentAuthorId, actorId, actorName, postId, commentId }) {
   if (commentAuthorId === actorId) return;
   return publishNotificationEvent({
@@ -67,4 +80,5 @@ module.exports = {
   notifyCommentReacted,
   notifyPostMilestone,
   notifyAchievement,
+  notifyPostCommented,
 };

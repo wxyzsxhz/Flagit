@@ -3,7 +3,7 @@ const { makeId } = require("../utils/id");
 const { serializeComment } = require("../utils/serialize");
 const { reactionsForComments, emptyReactions } = require("../services/aggregate.service");
 const { moderate } = require("../services/moderation.service");
-const { notifyCommentReply, notifyCommentReacted } = require("../services/notification.service");
+const { notifyCommentReply, notifyCommentReacted, notifyPostCommented } = require("../services/notification.service");
 const { ApiError } = require("../middleware/errorHandler");
 const asyncHandler = require("../utils/asyncHandler");
 
@@ -47,6 +47,15 @@ const create = asyncHandler(async (req, res) => {
   if (parent) {
     await notifyCommentReply({
       parentAuthorId: parent.authorId,
+      actorId: req.user.id,
+      actorName: req.user.username,
+      postId,
+      commentId: comment.id,
+    });
+  } else {
+    // Top-level comment on the post itself → notify the post author.
+    await notifyPostCommented({
+      postAuthorId: post.authorId,
       actorId: req.user.id,
       actorName: req.user.username,
       postId,

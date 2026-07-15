@@ -10,7 +10,7 @@ import {
 } from "./vibe-store";
 import { apiGet, apiPost, apiPatch, apiDelete, setAccessToken, refreshSession, ApiError } from "./api";
 
-export type NotificationType = "like_post" | "like_comment" | "reply_comment" | "post_milestone" | "achievement" | "comment_on_post";
+export type NotificationType = "like_post" | "like_comment" | "reply_comment" | "comment_post" | "post_milestone" | "achievement";
 
 export interface Notification {
   id: string;
